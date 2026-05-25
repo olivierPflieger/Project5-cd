@@ -3,6 +3,10 @@
   hosts: all
   become: true
 
+  vars:
+    app_source_dir: "olympic-games-starter/"
+    app_target_dir: "/var/www/html/olympic-games-starter"
+
   tasks:
     - name: Update apt cache
       apt:
@@ -10,8 +14,30 @@
 
     - name: Install nginx
       apt:
-        name: nginx
+        name: 
+          - nginx
         state: present
+
+    - name: Remove existing directory /olympic-games-starter
+      file:
+        path: "{{ app_target_dir }}"
+        state: absent
+
+    - name: Copy static application files in /olympic-games-starter
+      copy:
+        src: "{{ app_source_dir }}"
+        dest: "{{ app_target_dir }}"
+      notify: Restart nginx
+
+    - name: Apply nginx configuration
+      template:
+        src: files/nginx.conf.j2
+        dest: /etc/nginx/sites-available/default
+      notify: Restart nginx
+
+    - name: Validate nginx configuration
+      command: nginx -t
+      changed_when: false
 
     - name: Ensure nginx is started
       service:
@@ -22,3 +48,8 @@
   handlers:
     # Implémenter ici le handler redémarrant automatiquement le serveur Nginx lorsque le playbook
     # opère une modification de la configuration du serveur.
+
+    - name: Restart nginx
+      service:
+        name: nginx
+        state: restarted

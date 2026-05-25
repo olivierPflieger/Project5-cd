@@ -6,3 +6,5 @@ oc-key-eu-central-1.pem
 # Terraform state files
 *.tfstate
 *.tfstate.*
+
+Ansible/aws
