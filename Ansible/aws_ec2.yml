@@ -1,0 +1,15 @@
+plugin: amazon.aws.aws_ec2
+
+regions:
+  - us-east-1
+
+filters:
+  instance-state-name: running
+  tag:Name: OpenClassrooms-EDO-P5
+
+hostnames:
+  - dns-name
+
+compose:
+  ansible_user: "'ubuntu'"
+  ansible_ssh_private_key_file: "'~/.ssh/oc-project5-key-us-east-1.pem'"
