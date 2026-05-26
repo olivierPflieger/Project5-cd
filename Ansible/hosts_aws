@@ -1,0 +1,2 @@
+[all]
+ec2-3-215-73-151.compute-1.amazonaws.com ansible_ssh_user=ubuntu ansible_ssh_private_key_file=~/.ssh/oc-project5-key-us-east-1.pem

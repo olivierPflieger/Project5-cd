@@ -4,7 +4,7 @@
   become: true
 
   vars:
-    app_source_dir: "olympic-games-starter/"
+    app_source_dir: "app/olympic-games-starter/"
     app_target_dir: "/var/www/html/olympic-games-starter"
 
   tasks:
@@ -31,7 +31,7 @@
 
     - name: Apply nginx configuration
       template:
-        src: files/nginx.conf.j2
+        src: nginx/app.conf
         dest: /etc/nginx/sites-available/default
       notify: Restart nginx
 
