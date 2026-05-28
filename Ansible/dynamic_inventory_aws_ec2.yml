@@ -12,4 +12,4 @@ hostnames:
 
 compose:
   ansible_user: "'ubuntu'"
-  ansible_ssh_private_key_file: "'~/.ssh/oc-project5-key-us-east-1.pem'"
+  ansible_ssh_private_key_file: "'~/.ssh/openclassrooms_edo_p5.pem'"
