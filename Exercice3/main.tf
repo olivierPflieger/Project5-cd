@@ -28,6 +28,9 @@ resource "aws_instance" "webserver" {
     private_key = tls_private_key.my_ssh_key.private_key_pem
     host        = self.public_ip
   }
+  provisioner "local-exec" {
+    command = "sed -i 's/\r$//' install-webserver.sh"
+  }
   provisioner "remote-exec" {
     script = "./install-webserver.sh"
   }
@@ -39,7 +42,7 @@ resource "aws_instance" "haproxy" {
   tags = {
     Name = "OpenClassrooms-P5-HAProxy"
   }
-  vpc_security_group_ids = ["${aws_security_group.my_security_group.id}"]
+  vpc_security_group_ids = ["${aws_security_group.haproxy_security_group.id}"]
   key_name               = aws_key_pair.generated_key.key_name
   connection {
     type        = "ssh"
@@ -47,10 +50,23 @@ resource "aws_instance" "haproxy" {
     private_key = tls_private_key.my_ssh_key.private_key_pem
     host        = self.public_ip
   }
+  provisioner "file" {
+    content = templatefile("${path.module}/haproxy.cfg.tpl", {
+      ipserver0 = aws_instance.webserver[0].private_ip
+      ipserver1 = aws_instance.webserver[1].private_ip
+    })
+
+    destination = "/tmp/haproxy.cfg"
+  }
+
   provisioner "remote-exec" {
     inline = [
       "sudo apt-get update -y",
       "sudo apt-get install -y haproxy",
+      "sudo cp /tmp/haproxy.cfg /etc/haproxy/haproxy.cfg",
+      "sudo sed -i 's/\r$//' /etc/haproxy/haproxy.cfg",
+      "sudo haproxy -c -f /etc/haproxy/haproxy.cfg",
+      "sudo systemctl restart haproxy"
     ]
   }
 }
@@ -81,6 +97,38 @@ resource "aws_security_group" "my_security_group" {
   }
 }
 
+resource "aws_security_group" "haproxy_security_group" {
+  name = "OpenClassrooms-P5-HAProxy"
+
+  ingress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+  }
+
+  ingress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+  }
+
+  ingress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 8404
+    to_port     = 8404
+    protocol    = "tcp"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 variable "generated_key_name" {
   type        = string
   default     = "openclassrooms_edo_p5"
@@ -102,16 +150,4 @@ resource "local_sensitive_file" "pem_file" {
   file_permission      = "600"
   directory_permission = "700"
   content              = tls_private_key.my_ssh_key.private_key_pem
-}
-
-output "webserver_ssh" {
-  value = { for i in aws_instance.webserver : i.tags.Name => "\nPour se connecter au serveur:\n\tssh -i ${local_sensitive_file.pem_file.filename} -o IdentitiesOnly=yes ubuntu@${i.public_dns}" }
-}
-
-output "haproxy_ssh" {
-  value = "Pour se connecter au serveur 'haproxy':\n\tssh -i ${local_sensitive_file.pem_file.filename} -o IdentitiesOnly=yes ubuntu@${aws_instance.haproxy.public_dns}"
-}
-
-output "haproxy_http" {
-  value = "Pour accéder au load-balancer:\n\thttp://${aws_instance.haproxy.public_dns}"
 }
