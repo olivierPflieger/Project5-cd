@@ -1,5 +1,10 @@
 all:
   children:
+    haproxy:
+      hosts:
+        loadbalancer:
+          ansible_host: ${haproxy_public_dns}
+          private_ip: ${haproxy_private_ip}
     webservers:
       hosts:
 %{ for name, server in webservers ~}

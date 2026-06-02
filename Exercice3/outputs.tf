@@ -12,15 +12,15 @@ output "webserver_http" {
 
 output "haproxy_ssh" {
   description = "Commande SSH pour se connecter au serveur HAProxy"
-  value = "ssh -i ~/.ssh/aws_${aws_key_pair.generated_key.key_name}.pem -o IdentitiesOnly=yes ubuntu@${aws_instance.haproxy.public_dns}"  
+  value       = "ssh -i ~/.ssh/aws_${aws_key_pair.generated_key.key_name}.pem -o IdentitiesOnly=yes ubuntu@${aws_instance.haproxy.public_dns}"
 }
 
 output "haproxy_http" {
   description = "URL pour accéder au load balancer HAProxy"
-  value = "http://${aws_instance.haproxy.public_dns}"
+  value       = "http://${aws_instance.haproxy.public_dns}"
 }
 
 output "haproxy_stats" {
   description = "URL pour accéder aux statistiques HAProxy"
-  value = "http://${aws_instance.haproxy.public_dns}:8404/stats"
+  value       = "http://${aws_instance.haproxy.public_dns}:8404/stats"
 }

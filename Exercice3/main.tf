@@ -50,25 +50,26 @@ resource "aws_instance" "haproxy" {
     private_key = tls_private_key.my_ssh_key.private_key_pem
     host        = self.public_ip
   }
-  provisioner "file" {
-    content = templatefile("${path.module}/haproxy.cfg.tpl", {
-      ipserver0 = aws_instance.webserver[0].private_ip
-      ipserver1 = aws_instance.webserver[1].private_ip
-    })
 
-    destination = "/tmp/haproxy.cfg"
-  }
+  # provisioner "file" {
+  #   content = templatefile("${path.module}/haproxy.cfg.tpl", {
+  #     ipserver0 = aws_instance.webserver[0].private_ip
+  #     ipserver1 = aws_instance.webserver[1].private_ip
+  #   })
 
-  provisioner "remote-exec" {
-    inline = [
-      "sudo apt-get update -y",
-      "sudo apt-get install -y haproxy",
-      "sudo cp /tmp/haproxy.cfg /etc/haproxy/haproxy.cfg",
-      "sudo sed -i 's/\r$//' /etc/haproxy/haproxy.cfg",
-      "sudo haproxy -c -f /etc/haproxy/haproxy.cfg",
-      "sudo systemctl restart haproxy"
-    ]
-  }
+  #   destination = "/tmp/haproxy.cfg"
+  # }
+
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "sudo apt-get update -y",
+  #     "sudo apt-get install -y haproxy",
+  #     "sudo cp /tmp/haproxy.cfg /etc/haproxy/haproxy.cfg",
+  #     "sudo sed -i 's/\r$//' /etc/haproxy/haproxy.cfg",
+  #     "sudo haproxy -c -f /etc/haproxy/haproxy.cfg",
+  #     "sudo systemctl restart haproxy"
+  #   ]
+  # }
 }
 
 resource "aws_security_group" "my_security_group" {
@@ -146,20 +147,20 @@ resource "local_sensitive_file" "pem_file" {
   content              = tls_private_key.my_ssh_key.private_key_pem
 }
 
-# for i in aws_instance.webserver : i.tags.Name => "http://${i.public_dns}"
-
 # Generate a YAML inventory for Ansible
 resource "local_file" "ansible_inventory_yaml" {
   content = templatefile("${path.module}/inventory.yml.tpl", {
+    haproxy_public_dns = aws_instance.haproxy.public_dns
+    haproxy_private_ip = aws_instance.haproxy.private_ip
     webservers = {
       for i, instance in aws_instance.webserver :
       "web${i}" => {
         public_dns = instance.public_dns
-        private_ip  = instance.private_ip
+        private_ip = instance.private_ip
       }
     }
 
-    key_name = "aws_${aws_key_pair.generated_key.key_name}.pem"
+    key_name = "aws_${aws_key_pair.generated_key.key_name}"
   })
 
   filename = "${path.module}/inventory.yml"

@@ -17,8 +17,9 @@ backend servers
     option httpchk
     http-check send meth GET uri /health
     http-check expect status 200
-    server web0 ${ipserver0}:80 maxconn 32 check
-    server web1 ${ipserver1}:80 maxconn 32 check
+    {% for host in groups['webservers'] %}
+        server {{ host }} {{ hostvars[host].private_ip }}:80 maxconn 32 check
+    {% endfor %}
 
 listen stats
     bind *:8404
