@@ -12,7 +12,7 @@ resource "aws_instance" "oc_project5" {
   }
 
   vpc_security_group_ids = ["${aws_security_group.oc_project5_sg.id}"]
-  key_name = aws_key_pair.generated_key.key_name
+  key_name               = aws_key_pair.generated_key.key_name
 }
 
 resource "aws_security_group" "oc_project5_sg" {

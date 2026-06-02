@@ -5,5 +5,5 @@ output "instance_public_dns" {
 
 output "webserver_ssh" {
   description = "Commande SSH pour se connecter à l'instance"
-  value = "ssh -i ~/.ssh/${aws_key_pair.generated_key.key_name}.pem ubuntu@${aws_instance.oc_project5.public_dns}"
+  value       = "ssh -i ~/.ssh/${aws_key_pair.generated_key.key_name}.pem ubuntu@${aws_instance.oc_project5.public_dns}"
 }
