@@ -12,7 +12,6 @@ resource "aws_instance" "oc_project5" {
   }
 
   vpc_security_group_ids = ["${aws_security_group.oc_project5_sg.id}"]
-  # key_name               = "oc-project5-key-us-east-1"
   key_name = aws_key_pair.generated_key.key_name
 }
 
@@ -61,8 +60,7 @@ resource "aws_key_pair" "generated_key" {
   public_key = tls_private_key.my_ssh_key.public_key_openssh
 }
 
-// On stocke notre clé SSH privée localement dans le répertoire
-// ~/.ssh.
+// On stocke notre clé SSH privée localement dans le répertoire ~/.ssh
 resource "local_sensitive_file" "pem_file" {
   filename             = pathexpand("~/.ssh/${aws_key_pair.generated_key.key_name}.pem")
   file_permission      = "600"
