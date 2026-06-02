@@ -65,23 +65,11 @@ resource "local_sensitive_file" "pem_file" {
 
 # Generate a YAML inventory for Ansible
 resource "local_file" "ansible_inventory_yaml" {
-  content = yamlencode({
-    all = {
-      children = {
-        webservers = {
-          hosts = {            
-            web1 = {
-              ansible_host = aws_instance.oc_project5.public_dns
-              private_ip   = aws_instance.oc_project5.private_ip
-            }
-          }
-        }   
-      }
-      vars = {
-        ansible_user = "ubuntu"
-        ansible_ssh_private_key_file = "~/.ssh/${aws_key_pair.generated_key.key_name}.pem"
-      }
-    }
+  content = templatefile("${path.module}/inventory.yml.tpl", {
+    public_dns = aws_instance.oc_project5.public_dns
+    private_ip = aws_instance.oc_project5.private_ip
+    key_name   = aws_key_pair.generated_key.key_name
   })
+
   filename = "${path.module}/inventory.yml"
 }
