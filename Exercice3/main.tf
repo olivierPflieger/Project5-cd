@@ -50,26 +50,6 @@ resource "aws_instance" "haproxy" {
     private_key = tls_private_key.my_ssh_key.private_key_pem
     host        = self.public_ip
   }
-
-  # provisioner "file" {
-  #   content = templatefile("${path.module}/haproxy.cfg.tpl", {
-  #     ipserver0 = aws_instance.webserver[0].private_ip
-  #     ipserver1 = aws_instance.webserver[1].private_ip
-  #   })
-
-  #   destination = "/tmp/haproxy.cfg"
-  # }
-
-  # provisioner "remote-exec" {
-  #   inline = [
-  #     "sudo apt-get update -y",
-  #     "sudo apt-get install -y haproxy",
-  #     "sudo cp /tmp/haproxy.cfg /etc/haproxy/haproxy.cfg",
-  #     "sudo sed -i 's/\r$//' /etc/haproxy/haproxy.cfg",
-  #     "sudo haproxy -c -f /etc/haproxy/haproxy.cfg",
-  #     "sudo systemctl restart haproxy"
-  #   ]
-  # }
 }
 
 resource "aws_security_group" "my_security_group" {
