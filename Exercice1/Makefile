@@ -24,6 +24,7 @@ ping:
 
 # This target adds the public DNS names of the created instances to the SSH known_hosts file
 known-hosts:
+	@sed -i 's/\r$$//' inventory.yml
 	@host=$$(grep ansible_host inventory.yml | awk '{print $$2}'); \
 	echo "Adding $$host to known_hosts..."; \
 	ssh-keygen -R $$host >/dev/null 2>&1 || true; \

@@ -1,10 +1,12 @@
 global
     daemon
     maxconn 256
-    stats socket /var/lib/haproxy/stats
+    log /dev/log local0
 
 defaults
     mode http
+    log global
+    option httplog
     timeout connect 2s
     timeout client 30000ms
     timeout server 30000ms
@@ -15,11 +17,11 @@ frontend http_front
 
 backend servers
     balance roundrobin
-#    option httpchk
-#    http-check send meth GET uri /health
-#    http-check expect status 200
+    option httpchk
+    http-check send meth GET uri /
+    http-check expect status 200
     {% for host in groups['webservers'] %}
-        server {{ host }} {{ hostvars[host].private_ip }}:80 check inter 2000 rise 2 fall 3
+        server {{ host }} {{ hostvars[host].private_ip }}:80 maxconn 32 check inter 4s fastinter 1s downinter 2s rise 3 fall 3
     {% endfor %}
 
 listen stats
