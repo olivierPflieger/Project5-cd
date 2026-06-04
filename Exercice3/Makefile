@@ -31,25 +31,6 @@ known-hosts:
 		done \
 	done
 
-#	@for host in $$(grep ansible_host inventory.yml | awk '{print $$2}'); do \
-#		echo "$$host"; \
-# 		ssh-keygen -R $$host >/dev/null 2>&1 || true; \
-# 		until ssh-keyscan -H $$host >> ~/.ssh/known_hosts 2>/dev/null; do \
-# 			echo "SSH not ready yet..."; \
-# 			sleep 2; \
-# 		done \
-#	done
-
-#	@for host in $$(grep ansible_host inventory.yml | awk '{print $$2}'); do \
-#		echo "Adding $$host to known_hosts..."; \
-# 		ssh-keygen -R $$host >/dev/null 2>&1 || true; \
-# 		until ssh-keyscan -H $$host >> ~/.ssh/known_hosts 2>/dev/null; do \
-# 			echo "SSH not ready yet..."; \
-# 			sleep 2; \
-# 		done \
-#	done
-
-
 # Display outputs
 display:
 	@echo "SSH Haproxy: $$(terraform output haproxy_ssh)"
